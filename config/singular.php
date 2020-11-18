@@ -37,5 +37,5 @@ return [
      * need to update your .env file with this API key.
      */
 
-    'SINGULAR_API_KEY' => '',
+    'SINGULAR_API_KEY' => env('SINGULAR_API_KEY', ''),
 ];

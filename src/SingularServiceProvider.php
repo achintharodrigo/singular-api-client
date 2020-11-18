@@ -11,12 +11,8 @@ class SingularServiceProvider extends ServiceProvider
     public function boot() :void
     {
         $this->publishes([
-            __DIR__.'/../config/singular.php' => config_path('singular')
+            __DIR__.'/../config/singular.php' => config_path('singular.php')
         ], 'config');
-
-        $this->publishes([
-            __DIR__.'/../database/migrations/' => database_path('migrations')
-        ], 'migrations');
     }
 
     public function register()
