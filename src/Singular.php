@@ -3,7 +3,6 @@
 namespace AchinthaRodrigo\SingularApiClient;
 
 use Carbon\Carbon;
-use http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class Singular
@@ -146,7 +145,7 @@ class Singular
         return $this->formatResponse($this->dimensions);
     }
 
-    public function getDataAvailability($date, $format = 'json', $showNonActive = true) :Response
+    public function getDataAvailability($date, $format = 'json', $showNonActive = true) :array
     {
         $availableDate = Carbon::parse($date)->format('Y-m-d');
         $response = $this->request->get($this->baseUri . 'v2.0/data_availability_status', [
@@ -157,7 +156,7 @@ class Singular
         return $this->formatResponse($response);
     }
 
-    public function getReportStatus($id) :Response
+    public function getReportStatus($id) :array
     {
         $response = $this->request->get($this->baseUri . 'v2.0/get_report_status', [
             'report_id' => $id,
@@ -165,25 +164,25 @@ class Singular
         return $this->formatResponse($response);
     }
 
-    public function getFilters() :Response
+    public function getFilters() :array
     {
         $response = $this->request->get($this->baseUri . 'v2.0/reporting/filters');
         return $this->formatResponse($response);
     }
 
-    public function getCustomDimensions() :Response
+    public function getCustomDimensions() :array
     {
         $response = $this->request->get($this->baseUri . 'custom_dimensions');
         return $this->formatResponse($response);
     }
 
-    public function getCohortMetrics() :Response
+    public function getCohortMetrics() :array
     {
         $response = $this->request->get($this->baseUri . 'cohort_metrics');
         return $this->formatResponse($response);
     }
 
-    public function getConversionMetrics() :Response
+    public function getConversionMetrics() :array
     {
         $response = $this->request->get($this->baseUri . 'conversion_metrics');
         return $this->formatResponse($response);
@@ -197,7 +196,7 @@ class Singular
         $format = 'json',
         $timeBreakDown = 'all',
         $countryCodeFormat = 'iso3'
-    )  :Response {
+    )  :array {
         $start = Carbon::parse($start)->format('Y-m-d');
         $end = Carbon::parse($end)->format('Y-m-d');
         $response = $this->request->get($this->baseUri . 'v2.0/admonetization/reporting', [
@@ -212,13 +211,13 @@ class Singular
         return $this->formatResponse($response);
     }
 
-    public function getApps() :Response
+    public function getApps() :array
     {
         $response = $this->request->get($this->baseUri . 'v1/links/discover_apps');
         return $this->formatResponse($response);
     }
 
-    public function getAvailablePartners($appId) :Response
+    public function getAvailablePartners($appId) :array
     {
         $response = $this->request->get($this->baseUri . 'v1/links/discover_available_partners', [
             'singular_app_id' => $appId,
@@ -226,7 +225,7 @@ class Singular
         return $this->formatResponse($response);
     }
 
-    public function getLinks($appId = '', $partnerId = '', $linkId = '', $includeArchived = true) :Response
+    public function getLinks($appId = '', $partnerId = '', $linkId = '', $includeArchived = true) :array
     {
         $response = $this->request->get($this->baseUri . 'v1/links/view', [
             'singular_app_ids' => $appId,
@@ -237,7 +236,7 @@ class Singular
         return $this->formatResponse($response);
     }
 
-    public function getCustomLinks($appId = '', $customSource = '', $linkId = '', $includeArchived = true) :Response
+    public function getCustomLinks($appId = '', $customSource = '', $linkId = '', $includeArchived = true) :array
     {
         $response = $this->request->get($this->baseUri . 'v1/links/view_custom', [
             'singular_app_ids' => $appId,
@@ -256,7 +255,7 @@ class Singular
         $format = 'json',
         $timeBreakDown = 'all',
         $countryCodeFormat = 'iso3'
-    ) :Response {
+    ) :array {
         $start = Carbon::parse($start)->format('Y-m-d');
         $end = Carbon::parse($end)->format('Y-m-d');
         return $this->request->post($this->baseUri . 'v2.0/create_async_report')
@@ -271,7 +270,7 @@ class Singular
             ]);
     }
 
-    public function getReportData($id) :Response
+    public function getReportData($id) :array
     {
         $status = $this->getReportStatus($id);
         $filePath = $status['value']['download_url'];
@@ -290,6 +289,10 @@ class Singular
 
     private function formatResponse($response)
     {
-        return $response->json();
+        return [
+            'status' => $response->getStatusCode(),
+            'msg' => $response->getReasonPhrase(),
+            'data' => $response->json()
+        ];
     }
 }
