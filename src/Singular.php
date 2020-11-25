@@ -16,6 +16,16 @@ class Singular
         'month' => 'month',
         'all' => 'all',
     ];
+    private $cohortPeriods = [
+        '1d' => '1d',
+        '3d' => '3d',
+        '5d' => '5d',
+        '7d' => '7d',
+        '14d' => '14d',
+        '30d' => '3d',
+        'ltv' => 'LTV',
+        'actual' => 'Actual',
+    ];
     private $metrics = [
         'arpu' => 'ARPU',
         'custom_clicks' => 'Clicks',
@@ -132,17 +142,22 @@ class Singular
 
     public function getDefaultTimeBreakdown() :array
     {
-        return $this->formatResponse($this->timeBreakDown);
+        return $this->timeBreakDown;
     }
 
     public function getDefaultMetrics() :array
     {
-        return $this->formatResponse($this->metrics);
+        return $this->metrics;
     }
 
     public function getDefaultDimensions() :array
     {
-        return $this->formatResponse($this->dimensions);
+        return $this->dimensions;
+    }
+
+    public function getCohortPeriods() :array
+    {
+        return $this->cohortPeriods;
     }
 
     public function getDataAvailability($date, $format = 'json', $showNonActive = true) :array
@@ -252,13 +267,14 @@ class Singular
         $end,
         $dimensions = [],
         $metrics = [],
-        $format = 'json',
         $timeBreakDown = 'all',
+        $format = 'json',
         $countryCodeFormat = 'iso3'
-    ) :array {
+    ) :string {
         $start = Carbon::parse($start)->format('Y-m-d');
         $end = Carbon::parse($end)->format('Y-m-d');
-        return $this->request->post($this->baseUri . 'v2.0/create_async_report')
+
+        $response = $this->request->post($this->baseUri . 'v2.0/create_async_report')
             ->body([
                 'start_date' => $start,
                 'end_date' => $end,
@@ -268,12 +284,14 @@ class Singular
                 'time_breakdown' => $timeBreakDown,
                 'country_code_format' => $countryCodeFormat
             ]);
+
+        return json_decode($response)->value->report_id;
     }
 
-    public function getReportData($id) :array
+    public function getReportData($id) :string
     {
         $status = $this->getReportStatus($id);
-        $filePath = $status['value']['download_url'];
+        $filePath = $status['data']['value']['download_url'];
 
         $curlSession = curl_init();
         curl_setopt($curlSession, CURLOPT_SSL_VERIFYPEER, false);
@@ -284,7 +302,7 @@ class Singular
         $jsonData = json_decode(curl_exec($curlSession));
         curl_close($curlSession);
 
-        return $this->formatResponse($jsonData);
+        return json_encode($jsonData);
     }
 
     private function formatResponse($response)
