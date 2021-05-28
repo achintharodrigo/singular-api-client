@@ -1,6 +1,6 @@
 {
     "name": "achintharodrigo/singular-api-client",
-    "type": "library",
+    "type": "package",
     "description": "Simple intergration for Singular",
     "keywords": [
         "achintharodrigo",
